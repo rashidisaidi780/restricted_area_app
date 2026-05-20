@@ -66,5 +66,12 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<!-- Location permissions for geolocator -->
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>This app needs access to your location to report restricted area incidents accurately.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>This app needs access to your location to report restricted area incidents accurately.</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>This app needs access to your location to report restricted area incidents accurately.</string>
 </dict>
 </plist>

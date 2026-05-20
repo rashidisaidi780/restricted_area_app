@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'theme/app_theme.dart';
 import 'screens/home_screen.dart';
 import 'screens/report_screen.dart';
-import 'screens/map_screen.dart';
 import 'screens/settings_screen.dart';
 import 'screens/splash_screen.dart';
 
@@ -76,7 +75,6 @@ class _MyHomePageState extends State<MyHomePage> {
     final screens = [
       const HomeScreen(),
       const ReportScreen(),
-      const MapScreen(),
       SettingsScreen(
         onThemeToggle: widget.onThemeToggle,
         isDarkMode: widget.isDarkMode,
@@ -92,7 +90,6 @@ class _MyHomePageState extends State<MyHomePage> {
             icon: Icon(Icons.add_circle),
             label: 'Report',
           ),
-          BottomNavigationBarItem(icon: Icon(Icons.location_on), label: 'Map'),
           BottomNavigationBarItem(
             icon: Icon(Icons.settings),
             label: 'Settings',

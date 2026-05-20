@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:geolocator/geolocator.dart';
 import 'dart:io';
 
 class ReportScreen extends StatefulWidget {
@@ -30,6 +31,7 @@ class _ReportScreenState extends State<ReportScreen> {
 
   final severities = ['Low', 'Medium', 'High', 'Critical'];
   final ImagePicker _imagePicker = ImagePicker();
+  final TextEditingController _locationController = TextEditingController();
 
   Future<void> _takePhoto() async {
     try {
@@ -80,6 +82,73 @@ class _ReportScreenState extends State<ReportScreen> {
           backgroundColor: Colors.red,
         ),
       );
+    }
+  }
+
+  Future<void> _getCurrentLocation() async {
+    try {
+      // Check location permission status
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Location permission denied'),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
+          return;
+        }
+      }
+
+      if (permission == LocationPermission.deniedForever) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                'Location permission denied permanently. Please enable in settings.',
+              ),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+        return;
+      }
+
+      // Get current position
+      Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+      );
+
+      setState(() {
+        latitude = position.latitude.toStringAsFixed(4);
+        longitude = position.longitude.toStringAsFixed(4);
+        selectedLocation = '$latitude, $longitude';
+        locationSet = true;
+        _locationController.text = selectedLocation!;
+      });
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Location captured: $latitude, $longitude'),
+            backgroundColor: Colors.green,
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error getting location: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 
@@ -281,6 +350,7 @@ class _ReportScreenState extends State<ReportScreen> {
                         const SizedBox(height: 16),
                         // Location Name
                         TextFormField(
+                          controller: _locationController,
                           decoration: InputDecoration(
                             hintText: 'Location name or area',
                             border: OutlineInputBorder(
@@ -295,22 +365,9 @@ class _ReportScreenState extends State<ReportScreen> {
                         // Get Current Location Button
                         SizedBox(
                           width: double.infinity,
-                          child: OutlinedButton.icon(
-                            onPressed: () {
-                              setState(() {
-                                latitude = '40.7128';
-                                longitude = '-74.0060';
-                                locationSet = true;
-                              });
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text(
-                                    'Current location captured: 40.7128, -74.0060',
-                                  ),
-                                ),
-                              );
-                            },
-                            icon: const Icon(Icons.gps_fixed),
+                          child: FilledButton.icon(
+                            onPressed: _getCurrentLocation,
+                            icon: const Icon(Icons.my_location),
                             label: const Text('Get Current Location'),
                           ),
                         ),
@@ -325,14 +382,28 @@ class _ReportScreenState extends State<ReportScreen> {
                                 ).colorScheme.primary.withOpacity(0.1),
                                 borderRadius: BorderRadius.circular(8),
                               ),
-                              child: Text(
-                                'Location: $latitude, $longitude',
-                                style: Theme.of(context).textTheme.bodySmall
-                                    ?.copyWith(
-                                      color: Theme.of(
-                                        context,
-                                      ).colorScheme.primary,
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    Icons.check_circle,
+                                    color: Colors.green,
+                                    size: 20,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Text(
+                                      'Location: $latitude, $longitude',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodySmall
+                                          ?.copyWith(
+                                            color: Theme.of(
+                                              context,
+                                            ).colorScheme.primary,
+                                          ),
                                     ),
+                                  ),
+                                ],
                               ),
                             ),
                           ),
